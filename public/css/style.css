@@ -1,0 +1,162 @@
+@font-face {
+    font-family: 'cirrusFont';
+    src: url('../fonts/CirrusCumulus.ttf');
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #ff7aaf;
+}
+
+.cajaprincipal {
+    width: calc(100% - 10cm);
+    max-width: 800px;
+    padding: 2.5cm;
+    background: #ff7aaf;
+    border-radius: 8px;
+    /*box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);*/
+    box-sizing: border-box;
+}
+
+#titulo {
+    font-family: 'cirrusFont', Arial, Helvetica, sans-serif;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#resumen {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: left;
+    font-size: small;
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    height: 4cm;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: none;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #777777;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #393939;
+}
+
+.referencias {
+    margin-top: 20px;
+    font-size:x-small;
+    color: #333;
+}
+
+.referencias p {
+    margin: 5px 0;
+}
+/* Estilo para la checklist flotante */
+/* Estilo de la checklist utilizando la imagen proporcionada como fondo */
+.checklist-flotante {
+    position: fixed;
+    top: 20px;
+    left: 1080px;
+    width: 320px; /* Ajuste del ancho */
+    height: auto; /* Ajuste del alto */
+    padding: 30px;
+    background: url('../papel.png') no-repeat center center;
+    background-size: cover;
+    border: none; /* Sin borde */
+    border-radius: 0; /* Sin bordes redondeados */
+    box-shadow: none; /* Sin sombra */
+    font-family: 'cirrusFont', Arial, sans-serif; /* Fuente personalizada */
+    font-size: 18px;
+    color: #333; /* Color del texto para contraste */
+    line-height: 1.6;
+}
+
+/* Estilo para la lista de la checklist */
+.checklist-flotante ul {
+    list-style-type: none; /* Sin viñetas */
+    padding: 20;
+    margin: 0;
+}
+
+.checklist-flotante li {
+    margin: 12px 12px;
+    left:20px;
+    color: #333; /* Color del texto */
+    cursor: pointer;
+    transition: none; /* Sin transición de colores */
+    font-family: 'cirrusFont', Arial, sans-serif; /* Fuente personalizada */
+    position: relative;
+}
+
+/* Cambiar los ticks a puntos negros */
+.checklist-flotante li:before {
+    content: '•'; /* Punto negro como marcador */
+    position: absolute;
+    left: -20px; /* Alineación a la izquierda */
+    font-size: 20px; /* Tamaño del punto */
+    color: #000; /* Color negro */
+}
+
+/* Eliminar efecto de hover */
+.checklist-flotante li:hover {
+    color: #333; /* Mantener el mismo color al hacer hover */
+}
+
+/* Estilo para el título */
+.checklist-flotante h3 {
+    font-family: 'cirrusFont', Arial, sans-serif; /* Fuente personalizada */
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+/* Estilo para elementos completados */
+.checklist-flotante li.completed {
+    color: #000; /* Mantener el color del texto negro */
+    text-decoration: line-through; /* Tachado */
+}
+
+@font-face {
+    font-family: 'cirrusFont';
+    src: url('/mnt/data/CirrusCumulus.ttf') format('truetype');
+}
+
+.typewriter-container {
+    width: 100%;
+    max-width: 600px; 
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    background: rgba(255, 255, 255);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'cirrusFont', Arial, sans-serif;
+}
+
+.typewriter {
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    opacity: 1;
+    transition: opacity 15s ease-in-out;
+}
