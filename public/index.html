@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promptear un paper</title>
+    <!-- Fuente personalizada -->
+    <style>
+
+    </style>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Resto del contenido de la página -->
+    <div class="cajaprincipal">
+        <h1 id="titulo">Des-promptear un paper. Prácticas artísticas para la desarticulación de la inmediatez iconotextual de la IA</h1>
+        <p id="resumen"><strong>Resumen:</strong> Prompt, es en inglés inmediato y solicitud al mismo tiempo. Esta etimología polisémica que  ahora es también — para el resto de realidades no anglófonas — ese fragmento textual a través del que interactuamos con sistemas de inteligencia artificial; deviene el reflejo semántico de los procesos de aceleración sociotécnica que acostumbra a utilizar el sistema tecnocapitalista para cumplir con su paradigma de crecimiento exponencial. Estas tendencias aceleracionistas que procuran conceder lo deseado en el menor tiempo posible en nombre de la máxima eficiencia, nos han conducido a lo que algunos autores han denominado sociedades del sofoco y la fatiga (Espluga, 2021), repercutiendo asimismo en la producción textual e iconográfica de los últimos dos años, través de la implementación de la ingeniería de la demanda o prompt engineering.</p>
+        <textarea id="inputText" placeholder="Escribe aquí tu prompt..."></textarea>
+        <button onclick="submitText()">Enviar</button>
+        <button onclick="generateStyledPDF()">Descargar Paper Completo</button>
+        <div class="referencias">
+            <p>Espluga, E. (2021). <em>No seas tú mismo...</em></p>
+            <p>Hartmut, R. (2016). <em>Alienación Y Aceleración...</em></p>
+        </div>
+    </div>
+
+    <!-- Chatbot response section -->
+    <div class="chatbot-response">
+        <h3 id="título">Chatbot:</h3>
+        <div class="typewriter-container">
+            <div id="chatbotResponse" class="typewriter"></div>
+        </div>
+    </div>
+
+    <script>
+        const sectionPrompts = {
+            "Introduccion-Parte-1": [/contexto/i, /historia/i, /tema principal/i],
+            "Introduccion-Parte-2": [/hola/i],
+            "Introduccion-Parte-3": [/contexto3/i, /historia/i, /tema principal/i],
+            "Metodologia-Parte-1": [/cómo se hizo/i, /experimento/i, /método usado/i],
+            "Metodologia-Parte-2": [/cómo se hizo/i],
+            "Metodologia-Parte-3": [/cómo se hizo/i],
+            "Resultados-Parte-1": [/descubrimientos/i, /análisis/i, /datos obtenidos/i],
+            "Resultados-Parte-2": [/descubrimientos/i],
+            "Resultados-Parte-3": [/descubrimientos/i],
+            "Conclusiones-Parte-1": [/conclusión/i, /resumen final/i, /resultados clave/i],
+            "Conclusiones-Parte-2": [/conclusión/i],
+            "Conclusiones-Parte-3": [/conclusión/i]
+        };
+
+        const paperContent = {
+            "Introduccion-Parte-1": "",
+            "Introduccion-Parte-2": "",
+            "Introduccion-Parte-3": "",
+            "Metodologia-Parte-1": "",
+            "Metodologia-Parte-2": "",
+            "Metodologia-Parte-3": "",
+            "Resultados-Parte-1": "",
+            "Resultados-Parte-2": "",
+            "Resultados-Parte-3": "",
+            "Conclusiones-Parte-1": "",
+            "Conclusiones-Parte-2": "",
+            "Conclusiones-Parte-3": ""
+        };
+
+        let completedSections = new Set();
+
+        function checkSectionCompletion(prompt) {
+            for (let section in sectionPrompts) {
+                if (!completedSections.has(section) && sectionPrompts[section].some(pattern => pattern.test(prompt))) {
+                    completedSections.add(section);
+                    markSectionAsCompleted(section);
+                    return section;
+                }
+            }
+            return null;
+        }
+
+        function markSectionAsCompleted(section) {
+            const sectionId = section.toLowerCase() + "-item";
+            const sectionItem = document.getElementById(sectionId);
+            if (sectionItem) {
+                sectionItem.style.textDecoration = "line-through";
+                alert(`¡Has completado la sección: ${section}! Puedes descargar el PDF correspondiente.`);
+            } else {
+                console.error("No se pudo encontrar el elemento con id:", sectionId);
+            }
+        }
+
+        async function submitText() {
+            const inputText = document.getElementById("inputText").value;
+            const completedSection = checkSectionCompletion(inputText);
+
+            console.log(`Fetching content for prompt: ${inputText}`);
+            try {
+                const response = await fetch(`/generate-paper?sections=${completedSection || ""}&prompt=${encodeURIComponent(inputText)}`);
+                console.log("Response received from API:", response);
+
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta de la API: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Parsed JSON data:", data);
+
+                // Update the paper content if available
+                if (completedSection && data && data.paper && typeof data.paper[completedSection] === 'string' && data.paper[completedSection].trim() !== "") {
+                    paperContent[completedSection] = data.paper[completedSection];
+                    console.log(`Contenido actualizado para la sección ${completedSection}:`, paperContent[completedSection]);
+                    alert(`Se ha completado la sección: ${completedSection}. Puedes descargar el PDF actualizado.`);
+                } else {
+                    console.warn(`No se recibió contenido válido para la sección: ${completedSection}`);
+                    paperContent[completedSection] = "[Contenido no disponible]";
+                }
+
+                // Update the chatbot response if available
+                if (data && typeof data.chatbotResponse === 'string') {
+                    typeWriter(data.chatbotResponse);
+                } else {
+                    typeWriter("[Respuesta no disponible]");
+                }
+
+            } catch (error) {
+                console.error("Error al obtener la variación de la sección:", error);
+                alert("Hubo un problema al generar la variación.");
+            } finally {
+                document.getElementById("inputText").value = "";
+            }
+        }
+
+        function typeWriter(text) {
+            const chatbotResponseElement = document.getElementById("chatbotResponse");
+            chatbotResponseElement.innerHTML = "";
+            let i = 0;
+
+            function typeChar() {
+                if (i < text.length) {
+                    if (text.charAt(i) === '\n') {
+                        chatbotResponseElement.classList.add('fade-out');
+                    }
+                    chatbotResponseElement.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeChar, 50);
+                } else {
+                    chatbotResponseElement.classList.add('fade-out');
+                }
+            }
+
+            chatbotResponseElement.classList.remove('fade-out');
+            typeChar();
+        }
+
+        function generateStyledPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF("p", "pt", "a4");
+
+            try {
+                const marginLeft = 40;
+                const maxWidth = 515; // Adjusted for better margin handling
+                const pageHeight = 820; // Approximate height for content on A4
+                let yPos = 40;
+
+                doc.setFont("times", "normal");
+                doc.setFontSize(18);
+                doc.text("Despromptear un Paper", marginLeft, yPos);
+                yPos += 30;
+
+                doc.setFontSize(12);
+                doc.text("Autor: Sánchez Mora, Irene / Rangil Gallardo, Miguel", marginLeft, yPos);
+                yPos += 15;
+                doc.text("Laboratorio de Luz. Universidad Politécnica de València", marginLeft, yPos);
+                yPos += 25;
+
+                doc.setLineWidth(0.5);
+                doc.line(marginLeft, yPos, marginLeft + maxWidth, yPos);
+                yPos += 30;
+
+                doc.setFontSize(14);
+                doc.setFont("times", "italic");
+                doc.text("Resumen", marginLeft, yPos);
+                yPos += 20;
+
+                doc.setFont("times", "normal");
+                doc.setFontSize(11);
+                const resumen = "Prompt, es en inglés inmediato y solicitud al mismo tiempo. Esta etimología polisémica que  ahora es también — para el resto de realidades no anglófonas — ese fragmento textual a través del que interactuamos con sistemas de inteligencia artificial; deviene el reflejo semántico de los procesos de aceleración sociotécnica que acostumbra a utilizar el sistema tecnocapitalista para cumplir con su paradigma de crecimiento exponencial. Estas tendencias aceleracionistas que procuran conceder lo deseado en el menor tiempo posible en nombre de la máxima eficiencia, nos han conducido a lo que algunos autores han denominado sociedades del sofoco y la fatiga (Espluga, 2021), repercutiendo asimismo en la producción textual e iconográfica de los últimos dos años, través de la implementación de la ingeniería de la demanda o prompt engineering.";
+                const resumenLines = doc.splitTextToSize(resumen, maxWidth);
+                addTextWithPageOverflowHandling(doc, resumenLines, marginLeft, yPos, pageHeight);
+                yPos += resumenLines.length * 14 + 20;
+
+                for (let section in paperContent) {
+                    if (paperContent[section] && typeof paperContent[section] === "string" && paperContent[section].trim() !== "") {
+                        doc.setFont("times", "bold");
+                        doc.setFontSize(14);
+                        if (yPos > pageHeight) {
+                            doc.addPage();
+                            yPos = 40;
+                        }
+                        doc.text(section, marginLeft, yPos);
+                        yPos += 20;
+
+                        doc.setFont("times", "normal");
+                        doc.setFontSize(11);
+                        const sectionText = paperContent[section];
+                        const splitText = doc.splitTextToSize(sectionText, maxWidth);
+                        yPos = addTextWithPageOverflowHandling(doc, splitText, marginLeft, yPos, pageHeight);
+
+                        yPos += 20; // Space between sections
+                    } else {
+                        console.warn(`Skipping section '${section}' due to invalid content.`);
+                        if (yPos > pageHeight) {
+                            doc.addPage();
+                            yPos = 40;
+                        }
+                        doc.setFont("times", "italic");
+                        doc.setFontSize(11);
+                        doc.text(`[${section} contenido no disponible]`, marginLeft, yPos, { maxWidth: maxWidth, align: "justify" });
+                        yPos += 40;
+                    }
+                }
+
+                doc.save("paper_completo.pdf");
+            } catch (error) {
+                console
+                error("Error generating PDF:", error);
+                alert("Hubo un error al generar el PDF. Por favor, revisa el contenido e inténtalo de nuevo.");
+            }
+        }
+
+        // Helper function to add text and handle page overflow
+        function addTextWithPageOverflowHandling(doc, textLines, marginLeft, yPos, pageHeight) {
+            for (let i = 0; i < textLines.length; i++) {
+                if (yPos > pageHeight) {
+                    doc.addPage();
+                    yPos = 40; // Reset yPos for the new page
+                }
+                doc.text(textLines[i], marginLeft, yPos);
+                yPos += 14; // Approximate line height
+            }
+            return yPos;
+        }
+    </script>
+</body>
+</html>
